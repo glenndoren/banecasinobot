@@ -57,30 +57,31 @@ server.post('/api/messages', connector.listen());
 */
 
 // Create bot dialogs
-bot.dialog('/', function (session) {
-    session.send("Let's play!");
-});
+//bot.dialog('/', function (session) {
+//    session.send("Let's play!");
+//});
 
 
 //=========================================================
 // Bots Dialogs
 //=========================================================
 
-/*
+
 var intents = new builder.IntentDialog();
 bot.dialog('/', intents);
 
-intents.onDefault(builder.DialogAction.send(prompts.helpMessage));
+//intents.onDefault(builder.DialogAction.send(prompts.helpMessage));
 
 intents.matches(/^status/i,
 [
     function (session)
     {
         console.log('status');
-        session.send("%s, you have $%d and your bet size is $%d.", session.userData.name, session.userData.money, session.userData.betSize)
+        //session.send("%s, you have $%d and your bet size is $%d.", session.userData.name, session.userData.money, session.userData.betSize)
+        session.send("You have $100 and your bet size is $5.");
     }
 ]);
-
+/*
 intents.matches(/^bet/i,
 [
     function (session)
@@ -121,7 +122,7 @@ intents.matches(/^flip/i,
 //    //session.send("Say something else...");
 //});
 
-
+/*
 // Install First Run middleware and dialog
 bot.use(builder.Middleware.firstRun({ version: 1.0, dialogId: '*:/firstRun' }));
 bot.dialog('/firstRun', [
@@ -151,4 +152,5 @@ bot.dialog('/firstRun', [
         session.endDialog("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
     }
 ]);
+*/
 
