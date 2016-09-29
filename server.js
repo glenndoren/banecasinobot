@@ -57,15 +57,16 @@ server.post('/api/messages', connector.listen());
 */
 
 // Create bot dialogs
-//bot.dialog('/', function (session) {
-//    session.send("Let's play!");
-//});
+bot.dialog('/', function (session) {
+    session.send("Let's play!");
+});
 
 
 //=========================================================
 // Bots Dialogs
 //=========================================================
 
+/*
 var intents = new builder.IntentDialog();
 bot.dialog('/', intents);
 
@@ -112,7 +113,7 @@ intents.matches(/^flip/i,
         }
     }
 ]);
-
+*/
 
 //bot.dialog('/', function (session) {
 //    session.send("%s ($%d), what would you like to do?", session.userData.name, session.userData.money);
