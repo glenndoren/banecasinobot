@@ -58,10 +58,16 @@ var bot = new builder.UniversalBot(connector);
 //server.post('/api/messages', connector.listen());
 */
 
+// Create bot dialogs
+bot.dialog('/', function (session) {
+    session.send("Let's play!");
+});
+
+
 //=========================================================
 // Bots Dialogs
 //=========================================================
-
+/*
 var intents = new builder.IntentDialog();
 bot.dialog('/', intents);
 
@@ -109,13 +115,13 @@ intents.matches(/^flip/i,
     }
 ]);
 
-/*
-bot.dialog('/', function (session) {
-    session.send("%s ($%d), what would you like to do?", session.userData.name, session.userData.money);
-    //session.send("%s, I heard: %s", session.userData.name, session.message.text);
-    //session.send("Say something else...");
-});
-*/
+
+//bot.dialog('/', function (session) {
+//    session.send("%s ($%d), what would you like to do?", session.userData.name, session.userData.money);
+//    //session.send("%s, I heard: %s", session.userData.name, session.message.text);
+//    //session.send("Say something else...");
+//});
+
 
 // Install First Run middleware and dialog
 bot.use(builder.Middleware.firstRun({ version: 1.0, dialogId: '*:/firstRun' }));
@@ -146,3 +152,4 @@ bot.dialog('/firstRun', [
         session.endDialog("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
     }
 ]);
+*/
