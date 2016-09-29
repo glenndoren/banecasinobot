@@ -57,11 +57,11 @@ server.post('/api/messages', connector.listen());
 */
 
 // Create bot dialogs
-bot.dialog('/', function (session) {
-    session.send("Let's play!");
-});
+//bot.dialog('/', function (session) {
+//    session.send("Let's play!");
+//});
 
-/*
+
 //=========================================================
 // Bots Dialogs
 //=========================================================
@@ -150,4 +150,4 @@ bot.dialog('/firstRun', [
         session.endDialog("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
     }
 ]);
-*/
+
