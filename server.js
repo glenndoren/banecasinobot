@@ -2,7 +2,7 @@
 
 //id 09ff0371-087e-4cb4-bde8-bf8ed549b5d4
 //secret FTe7CBjTq4mad8LRKQaqcXq
-/*
+
 var restify = require('restify'); 
 var builder = require('botbuilder'); 
 
@@ -26,8 +26,8 @@ server.post('/api/messages', connector.listen());
 bot.dialog('/', function (session) {
     session.send("Hello World");
 });
-*/
 
+/*
 var restify = require('restify');
 var builder = require('botbuilder');
 var prompts = require('./prompts');
@@ -52,12 +52,6 @@ var connector = new builder.ChatConnector({
 var bot = new builder.UniversalBot(connector);
 server.post('/api/messages', connector.listen());
 
-/*
-var connector = new builder.ConsoleConnector().listen();
-var bot = new builder.UniversalBot(connector);
-//server.post('/api/messages', connector.listen());
-*/
-
 // Create bot dialogs
 bot.dialog('/', function (session) {
     session.send("Let's play!");
@@ -67,7 +61,7 @@ bot.dialog('/', function (session) {
 //=========================================================
 // Bots Dialogs
 //=========================================================
-/*
+
 var intents = new builder.IntentDialog();
 bot.dialog('/', intents);
 
