@@ -1,0 +1,28 @@
+{
+  "name": "banecasinobot",
+  "version": "1.0.0",
+  "description": "Bot in node.js using azure and msft bot framework.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glenndoren/banecasinobot.git"
+  },
+  "keywords": [
+    "bot",
+    "bane",
+    "azure"
+  ],
+  "author": "Glenn Doren",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/glenndoren/banecasinobot/issues"
+  },
+  "homepage": "https://github.com/glenndoren/banecasinobot#readme",
+  "dependencies": {
+    "botbuilder": "^3.2.3",
+    "restify": "^4.1.1"
+  }
+}
