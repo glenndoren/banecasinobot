@@ -73,7 +73,7 @@ bot.dialog('/firstrun', function (session) {
 var intents = new builder.IntentDialog();
 bot.dialog('/', intents);
 
-//intents.onDefault(builder.DialogAction.send(prompts.helpMessage));
+intents.onDefault(builder.DialogAction.send(prompts.helpMessage));
 
 intents.matches(/^status/i,
 [
