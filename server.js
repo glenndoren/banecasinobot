@@ -4,7 +4,8 @@
 //secret FTe7CBjTq4mad8LRKQaqcXq
 
 var restify = require('restify'); 
-var builder = require('botbuilder'); 
+var builder = require('botbuilder');
+var prompts = require('./prompts');
 
 var appId = process.env.MY_APP_ID || "Missing app ID";
 var appPassword = process.env.MY_APP_PASSWORD || "Missing app password";
@@ -73,7 +74,7 @@ bot.dialog('/firstrun', function (session) {
 var intents = new builder.IntentDialog();
 bot.dialog('/', intents);
 
-intents.onDefault(builder.DialogAction.send("Damn!"));
+intents.onDefault(builder.DialogAction.send(prompts.helpMessage));
 
 intents.matches(/^status/i,
 [
