@@ -67,6 +67,7 @@ server.post('/api/messages', connector.listen());
 // Bots Dialogs
 //=========================================================
 bot.use(builder.Middleware.firstRun({ version: 1.0, dialogId: '*:/firstRun' }));
+
 bot.dialog('/firstrun', function (session) {
     session.send("Let's play!");
 });
@@ -75,6 +76,10 @@ var intents = new builder.IntentDialog();
 bot.dialog('/', intents);
 
 intents.onDefault(builder.DialogAction.send(prompts.helpMessage));
+
+intents.onBegin(function(session) {
+    session.send("Let's play!");
+});
 
 intents.matches(/^status/i,
 [
@@ -126,9 +131,10 @@ intents.matches(/^flip/i,
 //    //session.send("Say something else...");
 //});
 
-/*
+
 // Install First Run middleware and dialog
 bot.use(builder.Middleware.firstRun({ version: 1.0, dialogId: '*:/firstRun' }));
+/*
 bot.dialog('/firstRun', [
     function (session) {
         console.log('firstRun');
