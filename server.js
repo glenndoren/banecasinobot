@@ -65,7 +65,10 @@ server.post('/api/messages', connector.listen());
 //=========================================================
 // Bots Dialogs
 //=========================================================
-
+bot.use(builder.Middleware.firstRun({ version: 1.0, dialogId: '*:/firstRun' }));
+bot.dialog('/firstrun', function (session) {
+    session.send("Let's play!");
+});
 
 var intents = new builder.IntentDialog();
 bot.dialog('/', intents);
@@ -122,7 +125,7 @@ intents.matches(/^flip/i,
 //    //session.send("Say something else...");
 //});
 
-
+/*
 // Install First Run middleware and dialog
 bot.use(builder.Middleware.firstRun({ version: 1.0, dialogId: '*:/firstRun' }));
 bot.dialog('/firstRun', [
@@ -152,5 +155,5 @@ bot.dialog('/firstRun', [
         session.endDialog("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
     }
 ]);
-
+*/
 
