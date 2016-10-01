@@ -66,11 +66,11 @@ server.post('/api/messages', connector.listen());
 //=========================================================
 // Bots Dialogs
 //=========================================================
-bot.use(builder.Middleware.firstRun({ version: 1.0, dialogId: '*:/firstRun' }));
+//bot.use(builder.Middleware.firstRun({ version: 1.0, dialogId: '*:/firstRun' }));
 
-bot.dialog('/firstrun', function (session) {
-    session.send("Let's play!");
-});
+//bot.dialog('/firstrun', function (session) {
+//    session.send("Let's play!");
+//});
 
 var intents = new builder.IntentDialog();
 bot.dialog('/', intents);
