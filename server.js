@@ -138,7 +138,8 @@ intents.matches(/^join/i,
         // We'll save the users name and send them an initial greeting. All
         // future messages from the user will be routed to the root dialog.
         session.userData.betSize = results.response;
-        session.endDialog("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
+        session.send("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
+        //session.endDialog("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
     }
 ]);
 
