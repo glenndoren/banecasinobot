@@ -90,6 +90,57 @@ intents.matches(/^status/i,
         session.send("You have $100 and your bet size is $5.");
     }
 ]);
+
+intents.matches(/^flip/i,
+[
+    function (session)
+    {
+        var coin = Math.floor(Math.random() * 2);
+        if (coin == 0)
+        {
+            // you lose
+            session.send("Coin comes up TAILS. You lose $%s.", session.userData.betSize);
+            session.userData.money -= session.userData.betSize;
+        }
+        else
+        {
+            // you win
+            session.send("Coin comes up HEADS. You win $%s!", session.userData.betSize);
+            session.userData.money += session.userData.betSize;
+        }
+    }
+]);
+
+intents.matches('/^join/i', [
+    function (session)
+    {
+        builder.Prompts.text(session, "Welcome to the Casino! What's your name?");
+    },
+    function (session, results)
+     {
+        // We'll save the users name and ask him for his starting money. All
+        // future messages from the user will be routed to the root dialog.
+        session.userData.name = results.response;
+        var prompt = "Welcome to the Casino, " + session.userData.name + "! How much money do you have to play with?";
+        builder.Prompts.number(session, prompt);
+    },
+    function (session, results)
+    {
+        // We'll save the users name and ask him for his starting money. All
+        // future messages from the user will be routed to the root dialog.
+        session.userData.money = results.response;
+        var prompt = "What is your bet size?";
+        builder.Prompts.number(session, prompt);
+    },
+    function (session, results)
+    {
+        // We'll save the users name and send them an initial greeting. All
+        // future messages from the user will be routed to the root dialog.
+        session.userData.betSize = results.response;
+        session.endDialog("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
+    }
+]);
+
 /*
 intents.matches(/^bet/i,
 [
