@@ -2,26 +2,37 @@
 
 //id 09ff0371-087e-4cb4-bde8-bf8ed549b5d4
 //secret FTe7CBjTq4mad8LRKQaqcXq
-
 var restify = require('restify'); 
 var builder = require('botbuilder');
 var prompts = require('./prompts');
 
-var appId = process.env.MY_APP_ID || "Missing app ID";
-var appPassword = process.env.MY_APP_PASSWORD || "Missing app password";
+var testIt = false;
 
-// Setup Restify Server
-var server = restify.createServer();
-server.listen(process.env.PORT || 3000, function() 
+var connector;
+var bot;
+if (testIt)
 {
-   console.log('%s listening to %s', server.name, server.url); 
-});
+    connector = new builder.ConsoleConnector().listen();
+    bot = new builder.UniversalBot(connector);
+}
+else
+{
+    var appId = process.env.MY_APP_ID || "Missing app ID";
+    var appPassword = process.env.MY_APP_PASSWORD || "Missing app password";
 
-// Create chat bot
-var connector = new builder.ChatConnector
-({ appId: process.env.MY_APP_ID, appPassword: process.env.MY_APP_PASSWORD }); 
-var bot = new builder.UniversalBot(connector);
-server.post('/api/messages', connector.listen());
+    // Setup Restify Server
+    var server = restify.createServer();
+    server.listen(process.env.PORT || 3000, function() 
+    {
+    console.log('%s listening to %s', server.name, server.url); 
+    });
+
+    // Create chat bot
+    connector = new builder.ChatConnector
+    ({ appId: process.env.MY_APP_ID, appPassword: process.env.MY_APP_PASSWORD }); 
+    bot = new builder.UniversalBot(connector);
+    server.post('/api/messages', connector.listen());
+}
 
 /*
 // Create bot dialogs
@@ -186,8 +197,8 @@ intents.matches(/^flip/i,
 
 
 // Install First Run middleware and dialog
-bot.use(builder.Middleware.firstRun({ version: 1.0, dialogId: '*:/firstRun' }));
 /*
+bot.use(builder.Middleware.firstRun({ version: 1.0, dialogId: '*:/firstRun' }));
 bot.dialog('/firstRun', [
     function (session) {
         console.log('firstRun');
