@@ -111,7 +111,8 @@ intents.matches(/^flip/i,
     }
 ]);
 
-intents.matches('/^join/i', [
+intents.matches(/^join/i,
+[
     function (session)
     {
         builder.Prompts.text(session, "Welcome to the Casino! What's your name?");
