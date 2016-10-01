@@ -1,15 +1,12 @@
-// Add your requirements
-
-//id 09ff0371-087e-4cb4-bde8-bf8ed549b5d4
-//secret FTe7CBjTq4mad8LRKQaqcXq
 var restify = require('restify'); 
 var builder = require('botbuilder');
 var prompts = require('./prompts');
 
+// 'testIt' lets us easily run it as a console bot for local testing
 var testIt = false;
 
-var connector;
-var bot;
+var connector = null;
+var bot = null;
 if (testIt)
 {
     connector = new builder.ConsoleConnector().listen();
@@ -24,7 +21,7 @@ else
     var server = restify.createServer();
     server.listen(process.env.PORT || 3000, function() 
     {
-    console.log('%s listening to %s', server.name, server.url); 
+        console.log('%s listening to %s', server.name, server.url); 
     });
 
     // Create chat bot
@@ -33,46 +30,6 @@ else
     bot = new builder.UniversalBot(connector);
     server.post('/api/messages', connector.listen());
 }
-
-/*
-// Create bot dialogs
-bot.dialog('/', function (session) {
-    session.send("Hello World");
-});
-*/
-
-/*
-var restify = require('restify');
-var builder = require('botbuilder');
-var prompts = require('./prompts');
-
-//=========================================================
-// Bot Setup
-//=========================================================
-
-// Setup Restify Server
-
-var server = restify.createServer();
-server.listen(process.env.port || process.env.PORT || 3978, function () {
-   console.log('%s listening to %s', server.name, server.url);
-});
-
-// Create chat bot
-
-var connector = new builder.ChatConnector({
-    appId: process.env.MY_APP_ID,
-    appPassword: process.env.MY_APP_PASSWORD
-});
-var bot = new builder.UniversalBot(connector);
-server.post('/api/messages', connector.listen());
-
-*/
-
-// Create bot dialogs
-//bot.dialog('/', function (session) {
-//    session.send("Let's play!");
-//});
-
 
 //=========================================================
 // Bots Dialogs
@@ -86,19 +43,49 @@ server.post('/api/messages', connector.listen());
 var intents = new builder.IntentDialog();
 bot.dialog('/', intents);
 
-intents.onDefault(builder.DialogAction.send(prompts.helpMessage));
+//intents.onDefault(builder.DialogAction.send(prompts.helpMessage));
 
-intents.onBegin(function(session) {
-    session.send("Let's play!");
+intents.onDefault(
+[
+    function (session, args, next)
+     {
+        if (!session.userData.name)
+        {
+            session.beginDialog('/join');
+        }
+        else
+        {
+            next();
+        }
+    },
+    function (session, results)
+    {
+        if (!session.userData.justJoined)
+        {
+            session.send('Hello %s!', session.userData.name);
+        }
+    }
+]);
+
+/*
+intents.onBegin(function(session)
+{
+    if (!session.userData.hasOwnProperty(name))
+    {
+        session.beginDialog('join');
+    }
+    else
+    {
+        session.beginDialog('status');
+    }
 });
+*/
 
 intents.matches(/^status/i,
 [
     function (session)
     {
-        console.log('status');
-        //session.send("%s, you have $%d and your bet size is $%d.", session.userData.name, session.userData.money, session.userData.betSize)
-        session.send("You have $100 and your bet size is $5.");
+        session.send("%s, you have $%d and your bet size is $%d.", session.userData.name, session.userData.money, session.userData.betSize);
     }
 ]);
 
@@ -122,7 +109,7 @@ intents.matches(/^flip/i,
     }
 ]);
 
-intents.matches(/^join/i,
+bot.dialog('/join',
 [
     function (session)
     {
@@ -149,8 +136,9 @@ intents.matches(/^join/i,
         // We'll save the users name and send them an initial greeting. All
         // future messages from the user will be routed to the root dialog.
         session.userData.betSize = results.response;
-        session.send("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
-        //session.endDialog("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
+        session.userData.justJoined = true;
+        //session.send("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
+        session.endDialog("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
     }
 ]);
 
