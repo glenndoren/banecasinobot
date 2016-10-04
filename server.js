@@ -1,6 +1,7 @@
 var restify = require('restify'); 
 var builder = require('botbuilder');
 var prompts = require('./prompts');
+var request = require('request');
 
 // 'testIt' lets us easily run it as a console bot for local testing
 var testIt = false;
@@ -86,6 +87,30 @@ intents.matches(/^status/i,
     function (session)
     {
         session.send("%s, you have $%d and your bet size is $%d.", session.userData.name, session.userData.money, session.userData.betSize);
+    }
+]);
+
+intents.matches(/^msft/i,
+[
+    function (session)
+    {
+        request('http://dev.markitondemand.com/Api/v2/Quote?symbol=MSFT', function (error, response, body)
+        {
+            //Check for error
+            if(error)
+            {
+                return console.log('Error:', error);
+            }
+
+            //Check for right status code
+            if (response.statusCode !== 200)
+            {
+                return console.log('Invalid Status Code Returned:', response.statusCode);
+            }
+
+            //All is good. Print the body
+            console.log(body); // Show the HTML for the Modulus homepage.
+        });
     }
 ]);
 
