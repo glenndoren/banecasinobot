@@ -132,7 +132,8 @@ intents.matches(/^bane/i,
         var attachment =
         {
             //contentUrl: "https://docs.botframework.com/en-us/images/faq-overview/botframework_overview_july.png",
-            contentUrl: "https://banecasinobot.azurewebsites.net/images/BaneIcon1.png",
+            //contentUrl: "https://banecasinobot.azurewebsites.net/images/BaneIcon1.png",
+            contentUrl: "http://cyntient.com/assets/GlennDoren.png",
             contentType: "image/png",
             name: "Bane.png"
         };
