@@ -72,6 +72,7 @@ intents.onDefault(
         {
             session.send('Hello %s!', session.userData.name);
         }
+        session.userData.justJoined = false;
     }
 ]);
 
