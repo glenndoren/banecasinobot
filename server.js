@@ -132,8 +132,8 @@ intents.matches(/^bane/i,
         var attachment =
         {
             //contentUrl: "https://docs.botframework.com/en-us/images/faq-overview/botframework_overview_july.png",
-            contentUrl: "https://drive.google.com/file/d/0B9X60Ya3GWxSY2Q4bFlEenRNcVk/view",
-            //contentUrl: "http://cyntient.com/assets/GlennDoren.png",
+            //contentUrl: "https://drive.google.com/file/d/0B9X60Ya3GWxSY2Q4bFlEenRNcVk/view",
+            contentUrl: "http://cyntient.com/assets/Bane1.png",
             contentType: "image/png",
             name: "Bane.png"
         };
