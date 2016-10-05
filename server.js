@@ -127,9 +127,9 @@ intents.matches(/^bane/i,
         var attachment =
         {
             //contentUrl: "https://docs.botframework.com/en-us/images/faq-overview/botframework_overview_july.png",
-            contentUrl: "/images/baneicon1.png",
+            contentUrl: "/images/BaneIcon1.png",
             contentType: "image/png",
-            name: "BotFrameworkOverview.png"
+            name: "Bane.png"
         };
         var msg = new builder.Message(session).addAttachment(attachment);
 
