@@ -9,7 +9,7 @@ var twilio = require('twilio');
 var twilioClient = null;
 
 // 'testIt' lets us easily run it as a console bot for local testing
-var testIt = false;
+var testIt = true;
 
 var connector = null;
 var bot = null;
@@ -126,13 +126,12 @@ intents.matches(/^bane/i,
         // Create and send attachment
         var attachment =
         {
-            contentUrl: "https://docs.botframework.com/en-us/images/faq-overview/botframework_overview_july.png",
+            //contentUrl: "https://docs.botframework.com/en-us/images/faq-overview/botframework_overview_july.png",
+            contentUrl: "/images/baneicon1.png",
             contentType: "image/png",
             name: "BotFrameworkOverview.png"
         };
-
-        var msg = new builder.Message(session)
-            .addAttachment(attachment);
+        var msg = new builder.Message(session).addAttachment(attachment);
 
         session.send(msg);
     }
@@ -167,6 +166,7 @@ intents.matches(/^quote/i,
             {
                 console.dir(JSON.stringify(result));
                 console.log("Company is " + result.StockQuote.Name);
+                session.send("%s is %s", result.StockQuote.Symbol, result.StockQuote.LastPrice)
             });
             //console.log(body.Name);
             //console.log(body); // Show the HTML for the Modulus homepage.
