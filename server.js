@@ -94,7 +94,11 @@ intents.matches(/^status/i,
 [
     function (session)
     {
-        session.send("%s, you have $%d and your bet size is $%d.", session.userData.name, session.userData.money, session.userData.betSize);
+        session.send("%s, you have $%d and your bet size is $%d. %s",
+            session.userData.name,
+            session.userData.money,
+            session.userData.betSize,
+            session.userData.justJoined ? "Just joined." : " ");
     }
 ]);
 
