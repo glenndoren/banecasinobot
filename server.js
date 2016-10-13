@@ -72,6 +72,7 @@ intents.onDefault(
         session.send('onDefault12');
         if (!session.userData.justJoined || (session.userData.justJoined == false))
         {
+            session.send('onDefault3');
             session.send('Hello %s!', session.userData.name);
         }
         session.userData.justJoined = false;
