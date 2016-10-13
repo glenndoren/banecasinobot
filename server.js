@@ -68,7 +68,7 @@ intents.onDefault(
     },
     function (session, results)
     {
-        if (!session.userData.justJoined)
+        if (!session.userData.justJoined || (session.userData.justJoined == false))
         {
             session.send('Hello %s!', session.userData.name);
         }
