@@ -56,7 +56,8 @@ bot.dialog('/', intents);
 intents.onDefault(
 [
     function (session, args, next)
-     {
+    {
+        session.send('onDefault1');
         if (!session.userData.name)
         {
             session.beginDialog('/join');
@@ -68,6 +69,7 @@ intents.onDefault(
     },
     function (session, results)
     {
+        session.send('onDefault12');
         if (!session.userData.justJoined || (session.userData.justJoined == false))
         {
             session.send('Hello %s!', session.userData.name);
