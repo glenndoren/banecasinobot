@@ -8,7 +8,7 @@ var twilio = require('twilio');
 var twilioClient = null;
 
 // 'testIt' lets us easily run it as a console bot for local testing
-var testIt = true;
+var testIt = false;
 
 var connector = null;
 var bot = null;
