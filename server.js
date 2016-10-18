@@ -264,6 +264,10 @@ intents.matches(/^good/i,
             {
                 session.send("Words are cheap. How about a bone? :D");
             }
+            else
+            {
+                session.send("My tail is waggin'!");
+            }
         }
         else
         {
