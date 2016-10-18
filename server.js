@@ -268,6 +268,28 @@ intents.matches(/^good/i,
     }
 ]);
 
+intents.matches(/^invite/i,
+[
+    function (session)
+    {
+        builder.Prompts.text(session, "What mobile phone should I invite? (e.g. +13124465983)");
+    },
+    function (session, results)
+    {
+        twilioClient.sendMessage({
+            // send a text to this number
+            to: results.response,
+            
+            // A Twilio number you bought - see:
+            // https://www.twilio.com/user/account/phone-numbers/incoming
+            from: '+19419328711',
+            
+            // The body of the text message
+            body: 'Hello from Bane, K9 Prince of Belltown! %s told me to ping ya :D' + userData.name
+        });
+    }
+]);
+
 bot.dialog('/profile',
 [
     function (session)
