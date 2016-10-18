@@ -4,11 +4,11 @@ module.exports = {
     "* 'SPEAK Bane!'\n" +
     "* 'get a stock QUOTE'\n" +
     "* 'FLIP a coin'\n" +
-    "* 'set your BET size'\n",
+    "* 'set your BET size'\n" +
     "* 'get more BONES'\n" +
     "* 'GIVE a bone'\n" +
     "* 'GOOD boy!'\n" +
-    "* 'INVITE' another person'\n" +
+    "* 'INVITE' another person'\n",
     flipResult: "Coin flip is %(coindSideUp)s. You %(result)s $%(amount)d.",
     status: "money: $%(money)d"
 };

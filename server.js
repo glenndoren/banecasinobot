@@ -8,7 +8,7 @@ var twilio = require('twilio');
 var twilioClient = null;
 
 // 'testIt' lets us easily run it as a console bot for local testing
-var testIt = false;
+var testIt = true;
 
 var connector = null;
 var bot = null;
@@ -56,11 +56,11 @@ module.exports = {
     "* 'SPEAK Bane!'\n" +
     "* 'get a stock QUOTE'\n" +
     "* 'FLIP a coin'\n" +
-    "* 'set your BET size'\n",
+    "* 'set your BET size'\n" +
     "* 'get more BONES'\n" +
     "* 'GIVE a bone'\n" +
     "* 'GOOD boy!'\n" +
-    "* 'INVITE' another person'\n" +
+    "* 'INVITE' another person'\n",
     flipResult: "Coin flip is %(coindSideUp)s. You %(result)s $%(amount)d.",
     status: "money: $%(money)d"
 };
@@ -288,7 +288,7 @@ intents.matches(/^invite/i,
         twilioClient.sendMessage({
             to: results.response,
             from: '19419328711',
-            body: 'Hello from Bane, K9 Prince of Belltown! ' + session.userData.name + ' told me to ping ya :D';
+            body: 'Hello from Bane, K9 Prince of Belltown! ' + session.userData.name + ' told me to ping ya :D'
         });
         session.send("Invite sent. I hope they play with me!");
     }
