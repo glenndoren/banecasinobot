@@ -285,7 +285,7 @@ intents.matches(/^invite/i,
             from: '+19419328711',
             
             // The body of the text message
-            body: 'Hello from Bane, K9 Prince of Belltown! %s told me to ping ya :D' + userData.name
+            body: 'Hello from Bane, K9 Prince of Belltown! %s told me to ping ya :D' + session.userData.name
         });
     }
 ]);
