@@ -172,6 +172,15 @@ intents.matches(/^flip/i,
     }
 ]);
 
+intents.matches(/^reset/i,
+[
+    function (session)
+    {
+        delete session.userData.name;
+        session.send("UserData reset.");
+    }
+]);
+
 intents.matches(/^bet/i,
 [
     function (session)
