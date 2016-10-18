@@ -60,6 +60,7 @@ module.exports = {
     "* 'get more BONES'\n" +
     "* 'GIVE a bone'\n" +
     "* 'GOOD boy!'\n" +
+    "* 'INVITE' another person'\n" +
     flipResult: "Coin flip is %(coindSideUp)s. You %(result)s $%(amount)d.",
     status: "money: $%(money)d"
 };
@@ -82,7 +83,7 @@ intents.onDefault(
     {
         if (!session.userData.justJoined || (session.userData.justJoined == false))
         {
-            session.send('Hi %s!', session.userData.name);
+            session.send('Hi %s! Ask for HELP if you need it.', session.userData.name);
         }
         session.userData.justJoined = false;
     }
@@ -96,6 +97,14 @@ intents.matches(/^status/i,
             session.userData.name,
             session.userData.bones,
             session.userData.betSize);
+    }
+]);
+
+intents.matches(/^help/i,
+[
+    function (session)
+    {
+        session.send(prompts.helpMessage);
     }
 ]);
 
@@ -272,15 +281,16 @@ intents.matches(/^invite/i,
 [
     function (session)
     {
-        builder.Prompts.text(session, "What mobile phone should I invite? (e.g. +13124465983)");
+        builder.Prompts.text(session, "What mobile phone should I invite to play with me? (e.g. 13124465983)");
     },
     function (session, results)
     {
         twilioClient.sendMessage({
             to: results.response,
             from: '19419328711',
-            body: 'Hello from Bane, K9 Prince of Belltown! %s told me to ping ya :D' + session.userData.name
+            body: 'Hello from Bane, K9 Prince of Belltown! ' + session.userData.name + ' told me to ping ya :D';
         });
+        session.send("Invite sent. I hope they play with me!");
     }
 ]);
 
@@ -297,7 +307,7 @@ bot.dialog('/profile',
         // We'll save the users name and ask him for his starting money. All
         // future messages from the user will be routed to the root dialog.
         session.userData.name = results.response;
-        var prompt = "Hi, " + session.userData.name + "! What's your mobile phone number? (ex. 13121234567)";
+        var prompt = "Hi, " + session.userData.name + "! What's your mobile phone number? (ex. 13124465983)";
         builder.Prompts.text(session, prompt);
     },
     function (session, results)
