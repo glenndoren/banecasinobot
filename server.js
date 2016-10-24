@@ -148,7 +148,7 @@ intents.onBegin(
     function (session, args, next)
     {
         // Let's establish who the user is...'
-        session.send("onBegin");
+        // session.send("onBegin...");
         if (!session.userData.firstName)
         {
             session.beginDialog('/profile');
@@ -488,16 +488,17 @@ intents.matches(/^flip/i,
     function (session)
     {
         var coin = Math.floor(Math.random() * 2);
+        var boneString = (session.userData.betSize == 1) ? "bone" : "bones";
         if (coin == 0)
         {
             // you lose
-            session.send("Coin comes up TAILS. You lose %s bones. WHOOF!!", session.userData.betSize);
+            session.send("Coin comes up TAILS. You lose %s %s. WHOOF!!", session.userData.betSize, boneString);
             session.userData.bones -= session.userData.betSize;
         }
         else
         {
             // you win
-            session.send("Coin comes up HEADS. You win %s bones!", session.userData.betSize);
+            session.send("Coin comes up HEADS. You win %s %s!", session.userData.betSize, boneString);
             session.userData.bones += session.userData.betSize;
         }
     }
