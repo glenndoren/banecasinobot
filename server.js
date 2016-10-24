@@ -1,3 +1,11 @@
+//---------------------------------------------------------------------------------------------------------------------
+//
+//  BaneBot v0.1
+//
+//  Copyright (C) 2016 Glenn M. Doren - All Rights Reserved
+//
+//---------------------------------------------------------------------------------------------------------------------
+
 var restify = require('restify'); 
 var builder = require('botbuilder');
 var prompts = require('./prompts');
@@ -5,17 +13,16 @@ var request = require('request');
 var xml2js = require('xml2js');
 var twilio = require('twilio');
 
-var twilioClient = null;
-
 // 'testIt' lets us easily run it as a console bot for local testing
-var testIt = false;
+var testIt = true;
 
+var twilioClient = null;
 var connector = null;
 var bot = null;
 if (testIt)
 {
     // 2DO: probably best to not have twilio account SID and PASSWORD in here, but works for now. Should
-    // move into dev machine environment vars or datafile read.
+    // move into dev machine environment vars
     connector = new builder.ConsoleConnector().listen();
     bot = new builder.UniversalBot(connector);
     twilioClient = twilio('AC9851fbb881c977704480fbd1ea3e0201', '17925f26eb361a46ad67118bad15d413');
@@ -30,7 +37,7 @@ else
     var server = restify.createServer();
     server.listen(process.env.PORT || 3000, function() 
     {
-        console.log('%s listening to %s', server.name, server.url); 
+        console.log('%s listening to %s', server.firstName, server.url); 
     });
 
     // Create chat bot
@@ -40,37 +47,126 @@ else
     server.post('/api/messages', connector.listen());
 }
 
-//=========================================================
-// Bots Dialogs
-//=========================================================
-
-var intents = new builder.IntentDialog();
+var model = process.env.model || 'https://api.projectoxford.ai/luis/v1/application?id=f2547192-b302-472b-a796-56411c75e390&subscription-key=7fb26790dc614487b8f5f1b5ba3cadec&q=';
+var recognizer = new builder.LuisRecognizer(model);
+var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 bot.dialog('/', intents);
 
-//intents.onDefault(builder.DialogAction.send(prompts.helpMessage));
+//---------------------------------------------------------------------------------------------------------------------
+// Helper Functions
+//---------------------------------------------------------------------------------------------------------------------
 
-/*
-module.exports = {
-    helpMessage: "I'm Bane, the K9 Prince of Belltown! I like to play games and have fun. These are the commands I understand:\n\n" +
-    "* 'STATUS'\n" +
-    "* 'SPEAK Bane!'\n" +
-    "* 'get a stock QUOTE'\n" +
-    "* 'FLIP a coin'\n" +
-    "* 'set your BET size'\n" +
-    "* 'get more BONES'\n" +
-    "* 'GIVE a bone'\n" +
-    "* 'GOOD boy!'\n" +
-    "* 'INVITE' another person'\n",
-    flipResult: "Coin flip is %(coindSideUp)s. You %(result)s $%(amount)d.",
-    status: "money: $%(money)d"
-};
-*/
+function parseEnglishNumber(numberString)
+{
+    //2DO
+    /*
+    var thousands = ['','thousand','million', 'billion','trillion'];
+    var ones = ['zero','one','two','three','four', 'five','six','seven','eight','nine'];
+    var teens = ['ten','eleven','twelve','thirteen', 'fourteen','fifteen','sixteen', 'seventeen','eighteen','nineteen'];
+    var tens = ['twenty','thirty','forty','fifty', 'sixty','seventy','eighty','ninety'];
+    */
+    return NaN;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+function parseNumberEntity(numberEntity)
+{
+    if (numberEntity == null)
+    {
+        return NaN;
+    }
+    var parsedNum = parseFloat(numberEntity.entity);
+    if (isNaN(parsedNum))
+    {
+        //2DO: if english text number, translate!
+        return NaN;
+    }
+    return parsedNum;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+// Bane Actions
+//---------------------------------------------------------------------------------------------------------------------
+
+function giveBones(session, numBones)
+{
+    console.log("give " + numBones + " bones");
+    session.userData.bonesGiven += numBones;
+    if (session.userData.bonesGiven > 5)
+    {
+        session.send("You're my favorite person!");
+    }
+    else if (session.userData.bonesGiven > 1)
+    {
+        var s = "";
+        for (var i = 0; i < session.userData.bonesGiven; i++)
+        {
+            s += "WHOOF!!! ";
+        }
+        session.send(s);
+    }
+    else
+    {
+        session.send("That's it?");
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+function givePraise(session, amount)
+{
+    session.userData.praise += amount;
+    if (session.userData.praise > 2)
+    {
+        if (session.userData.bonesGiven < session.userData.praise)
+        {
+            session.send("Words are cheap. How about a bone? :D");
+        }
+        else
+        {
+            session.send("My tail is waggin'!");
+        }
+    }
+    else
+    {
+        var s = "";
+        for (var i = 0; i < session.userData.praise; i++)
+        {
+            s += "WHOOF!!! ";
+        }
+        session.send(s);
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+// LUIS Intents
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.onBegin(
+    // Note: onBegin automagically gets hit whenever a dialog is first opened...
+    function (session, args, next)
+    {
+        // Let's establish who the user is...'
+        session.send("onBegin");
+        if (!session.userData.firstName)
+        {
+            session.beginDialog('/profile');
+        }
+        else
+        {
+            next();
+        }
+    }
+);
+
+//---------------------------------------------------------------------------------------------------------------------
 
 intents.onDefault(
 [
     function (session, args, next)
     {
-        if (!session.userData.name)
+        if (!session.userData.firstName)
         {
             session.beginDialog('/profile');
         }
@@ -83,30 +179,252 @@ intents.onDefault(
     {
         if (!session.userData.justJoined || (session.userData.justJoined == false))
         {
-            session.send('Hi %s! Ask for HELP if you need it.', session.userData.name);
+            session.send('Hi %s! Ask for HELP if you need it.', session.userData.firstName);
         }
         session.userData.justJoined = false;
     }
 ]);
 
-intents.matches(/^status/i,
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.matches('SetValue',
 [
-    function (session)
+    function (session, args, next)
     {
-        session.send("%s, you have %d bones and your bet size is %d.",
-            session.userData.name,
-            session.userData.bones,
-            session.userData.betSize);
+        var numberEntity = builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
+        var number = parseNumberEntity(numberEntity);
+        if (isNaN(number))
+        {
+            session.send("Huh?");
+            return;           
+        }
+
+        var itemEntity = builder.EntityRecognizer.findEntity(args.entities, 'Item');
+        if (itemEntity == null)
+        {
+            session.send("huh?");
+            return;
+        }
+
+        if (itemEntity.entity.toLowerCase().indexOf("bone") != -1)
+        {
+            session.userData.bones = number;
+            session.send("Got it. Bones set to " + number + ".");
+        }
+        else if (itemEntity.entity.toLowerCase().indexOf("bet") != -1)
+        {
+            session.userData.betSize = number;
+            session.send("Got it. Bet size set to " + number + ".");
+        }
     }
 ]);
 
-intents.matches(/^help/i,
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.matches('Praise',
+[
+    function (session, args, next)
+    {
+        givePraise(session, 1);
+    }
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.matches('Hello',
+[
+    function (session, args, next)
+    {
+        if (!session.userData.firstName)
+        {
+            // We don't have a profile yet for this user, confirm first name
+            session.send("Hi!");
+            session.beginDialog('/profile');
+        }
+        else
+        {
+            session.send("Hi " + session.userData.firstName);
+        }
+    }
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.matches('GoodBye',
+[
+    function (session, args, next)
+    {
+        if (!session.userData.firstName)
+        {
+            // We don't have a profile yet for this user, confirm first name
+            session.send("I don't even know you!");
+            session.beginDialog('/profile');
+        }
+        else
+        {
+            session.send("Bye " + session.userData.firstName);
+        }
+    }
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.matches('Help',
 [
     function (session)
     {
         session.send(prompts.helpMessage);
     }
 ]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.matches('Speak',
+[
+    function (session, args, next)
+    {
+        session.send("Whoof! Whoof!");
+    }
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.matches('IncreaseValue',
+[
+    function (session, args, next)
+    {
+        var numberEntity = builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
+        var number = parseNumberEntity(numberEntity);
+        if (isNaN(number))
+        {
+            session.send("Huh?");
+            return;           
+        }
+
+        var itemEntity = builder.EntityRecognizer.findEntity(args.entities, 'Item');
+        if (itemEntity == null)
+        {
+            session.send("huh?");
+            return;
+        }
+
+        if (itemEntity.entity.toLowerCase().indexOf("bone") != -1)
+        {
+            session.userData.bones += number;
+            session.send("Got it. Bones increased by " + number + " to " + session.userData.bones + ".");
+        }
+        else if (itemEntity.entity.toLowerCase().indexOf("bet") != -1)
+        {
+            session.userData.betSize += number;
+            session.send("Got it. Bet Size increased by " + number + " to " + session.userData.betSize + ".");
+        }
+    }
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.matches('DecreaseValue',
+[
+    function (session, args, next)
+    {
+        var numberEntity = builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
+        var number = parseNumberEntity(numberEntity);
+        if (isNaN(number))
+        {
+            session.send("Huh?");
+            return;           
+        }
+
+        var itemEntity = builder.EntityRecognizer.findEntity(args.entities, 'Item');
+        if (itemEntity == null)
+        {
+            session.send("huh?");
+            return;
+        }
+
+        if (itemEntity.entity.toLowerCase().indexOf("bone") != -1)
+        {
+            session.userData.bones -= number;
+            session.send("Got it. Bones decreased by " + number + " to " + session.userData.bones + ".");
+        }
+        else if (itemEntity.entity.toLowerCase().indexOf("bet") != -1)
+        {
+            session.userData.betSize -= number;
+            session.send("Got it. Bet Size decreased by " + number + " to " + session.userData.betSize + ".");
+        }
+    }
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.matches('IdentifySelf',
+[
+    function (session, args, next)
+    {
+        var firstName = builder.EntityRecognizer.findEntity(args.entities, 'Name::FirstName');
+        if (!session.userData.firstName)
+        {
+            // We don't have a profile yet for this user, confirm first name
+            session.beginDialog('/profile');
+        }
+        else if (firstName)
+        {
+            session.send("Your name is " + firstName.entity + "?");
+        }
+        else
+        {
+            session.send('Hi! Ask for HELP if you need it.');
+        }
+    }
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.matches('GiveItem',
+[
+    function (session, args, next)
+    {
+        var numberEntity = builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
+        var number = parseNumberEntity(numberEntity);
+        if (isNaN(number))
+        {
+            // for now, just assume 1...
+            //2DO: clarify i dont understand with the user?
+            number = 1;
+        }
+
+        var itemEntity = builder.EntityRecognizer.findEntity(args.entities, 'Item');
+        if (itemEntity == null)
+        {
+            session.send("WHOOF?!");
+        }
+        else if (itemEntity.entity.toLowerCase().indexOf("bone") != -1)
+        {
+            giveBones(session, number);
+        }
+        else
+        {
+            session.send("thanks for the " + itemEntity.entity + "!");
+        }
+    }
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
+// Basic non-LUIS Intents
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.matches(/^status/i,
+[
+    function (session)
+    {
+        session.send("%s, you have %d bones and your bet size is %d.",
+            session.userData.firstName,
+            session.userData.bones,
+            session.userData.betSize);
+    }
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
 
 intents.matches(/^speak/i,
 [
@@ -126,6 +444,8 @@ intents.matches(/^speak/i,
         session.send("WHOOF!");
     }
 ]);
+
+//---------------------------------------------------------------------------------------------------------------------
 
 intents.matches(/^quote/i,
 [
@@ -161,6 +481,8 @@ intents.matches(/^quote/i,
     }
 ]);
 
+//---------------------------------------------------------------------------------------------------------------------
+
 intents.matches(/^flip/i,
 [
     function (session)
@@ -181,14 +503,18 @@ intents.matches(/^flip/i,
     }
 ]);
 
+//---------------------------------------------------------------------------------------------------------------------
+
 intents.matches(/^reset/i,
 [
     function (session)
     {
-        delete session.userData.name;
+        delete session.userData.firstName;
         session.send("UserData reset.");
     }
 ]);
+
+//---------------------------------------------------------------------------------------------------------------------
 
 intents.matches(/^bet/i,
 [
@@ -203,6 +529,8 @@ intents.matches(/^bet/i,
     }
 ]);
 
+//---------------------------------------------------------------------------------------------------------------------
+
 intents.matches(/^bones/i,
 [
     function (session)
@@ -215,6 +543,8 @@ intents.matches(/^bones/i,
         session.send("Yum! Those %d bones look tasty.", session.userData.bones);
     }
 ]);
+
+//---------------------------------------------------------------------------------------------------------------------
 
 intents.matches(/^give/i,
 [
@@ -246,6 +576,8 @@ intents.matches(/^give/i,
         }
     }
 ]);
+
+//---------------------------------------------------------------------------------------------------------------------
 
 intents.matches(/^good/i,
 [
@@ -281,6 +613,8 @@ intents.matches(/^good/i,
     }
 ]);
 
+//---------------------------------------------------------------------------------------------------------------------
+
 intents.matches(/^invite/i,
 [
     function (session)
@@ -292,26 +626,87 @@ intents.matches(/^invite/i,
         twilioClient.sendMessage({
             to: results.response,
             from: '19419328711',
-            body: 'Hello from Bane, K9 Prince of Belltown! ' + session.userData.name + ' told me to ping ya :D'
+            body: 'Hello from Bane, K9 Prince of Belltown! ' + session.userData.firstName + ' told me to ping ya :D'
         });
         session.send("Invite sent. I hope they play with me!");
     }
 ]);
 
-bot.dialog('/profile',
+//---------------------------------------------------------------------------------------------------------------------
+
+intents.matches(/^askName/i,
 [
     function (session)
     {
-        session.userData.bonesGiven = 0;
-        session.userData.praise = 0;
-        builder.Prompts.text(session, "I'm Bane! What's your name?");
+        session.beginDialog('/askNameDialog');
+    }
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+bot.dialog('/askNameDialog',
+[
+    function (session, args, next)
+    {
+        /*
+        if (session.userData.reset)
+        {
+            session.userData.bonesGiven = 0;
+            session.userData.praise = 0;
+            session.userData.firstName = null;
+            session.userData.reset = null;
+        }
+        */
+        builder.Prompts.text(session, "What's your first name?");
+    },
+    function (session, results)
+    {
+        // We'll save the users firstName and ask him for his starting money. All
+        // future messages from the user will be routed to the root dialog.
+        session.userData.temp = results.response;
+        //session.endDialog("ok");
+        builder.Prompts.text("Your first name is '" + session.userData.temp + "'?");
+    }
+    /*,
+    function (session, results)
+    {
+        if (results.response == "yes")
+        {
+            session.userData.firstName = session.userData.temp;
+            session.send("Roger that!");
+        }
+        else
+        {
+            session.send("Ok");
+        }
+        session.endDialog("ok");
+    }
+    */
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+bot.dialog('/profile',
+[
+    function (session, args, next)
+    {
+        if (!session.userData.firstName)
+        {
+            session.userData.bonesGiven = 0;
+            session.userData.praise = 0;
+            builder.Prompts.text(session, "I'm Bane! What's your first name?");
+        }
+        else
+        {
+            next();
+        }
     },
     function (session, results)
     {
         // We'll save the users name and ask him for his starting money. All
         // future messages from the user will be routed to the root dialog.
-        session.userData.name = results.response;
-        var prompt = "Hi, " + session.userData.name + "! What's your mobile phone number? (ex. 13124465983)";
+        session.userData.firstName = results.response;
+        var prompt = "Hi, " + session.userData.firstName + "! What's your mobile phone number? (eg: 13124465983)";
         builder.Prompts.text(session, prompt);
     },
     function (session, results)
@@ -319,7 +714,7 @@ bot.dialog('/profile',
         // We'll save the users name and ask him for his starting money. All
         // future messages from the user will be routed to the root dialog.
         session.userData.mobile = results.response;
-        var prompt = "How many bones do you have to play with?";
+        var prompt = "How many bones do you have to play with? (eg: 10)";
         builder.Prompts.number(session, prompt);
     },
     function (session, results)
@@ -327,7 +722,7 @@ bot.dialog('/profile',
         // We'll save the users name and ask him for his starting money. All
         // future messages from the user will be routed to the root dialog.
         session.userData.bones = results.response;
-        var prompt = "How many bones do you want to bet per game when we play for keeps?";
+        var prompt = "How many bones do you want to bet per game when we play for keeps? (eg: 1)";
         builder.Prompts.number(session, prompt);
     },
     function (session, results)
@@ -336,7 +731,10 @@ bot.dialog('/profile',
         // future messages from the user will be routed to the root dialog.
         session.userData.betSize = results.response;
         session.userData.justJoined = true;
-        //session.send("%s, play with your $%d wisely.", session.userData.name, session.userData.money);
-        session.endDialog("%s, welcome to my turf :) I can't wait to get those %d bones!", session.userData.name, session.userData.bones);
+        //session.send("%s, play with your $%d wisely.", session.userData.firstName, session.userData.money);
+        session.endDialog("%s, welcome to my turf :) I can't wait to get those %d bones!", session.userData.firstName, session.userData.bones);
     }
 ]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
