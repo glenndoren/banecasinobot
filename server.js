@@ -143,7 +143,6 @@ function givePraise(session, amount)
 // LUIS Intents
 //---------------------------------------------------------------------------------------------------------------------
 
-/*
 intents.onBegin(
     // Note: onBegin automagically gets hit whenever a dialog is first opened...
     function (session, args, next)
@@ -160,7 +159,7 @@ intents.onBegin(
         }
     }
 );
-*/
+
 //---------------------------------------------------------------------------------------------------------------------
 
 intents.onDefault(
