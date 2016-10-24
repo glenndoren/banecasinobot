@@ -143,6 +143,7 @@ function givePraise(session, amount)
 // LUIS Intents
 //---------------------------------------------------------------------------------------------------------------------
 
+/*
 intents.onBegin(
     // Note: onBegin automagically gets hit whenever a dialog is first opened...
     function (session, args, next)
@@ -159,7 +160,7 @@ intents.onBegin(
         }
     }
 );
-
+*/
 //---------------------------------------------------------------------------------------------------------------------
 
 intents.onDefault(
@@ -636,7 +637,7 @@ intents.matches(/^invite/i,
 
 intents.matches(/^askName/i,
 [
-    function (session)
+    function (session, args, next)
     {
         session.beginDialog('/askNameDialog');
     }
@@ -664,13 +665,12 @@ bot.dialog('/askNameDialog',
         // We'll save the users firstName and ask him for his starting money. All
         // future messages from the user will be routed to the root dialog.
         session.userData.temp = results.response;
-        //session.endDialog("ok");
-        builder.Prompts.text("Your first name is '" + session.userData.temp + "'?");
-    }
-    /*,
+        builder.Prompts.text(session, "Your first name is '" + session.userData.temp + "'?");
+    },
     function (session, results)
     {
-        if (results.response == "yes")
+        // As long as their response starts with 'y', we'll assume they meant yes :)'
+        if (results.response.toLowerCase().indexOf("y") == 0)
         {
             session.userData.firstName = session.userData.temp;
             session.send("Roger that!");
@@ -681,7 +681,6 @@ bot.dialog('/askNameDialog',
         }
         session.endDialog("ok");
     }
-    */
 ]);
 
 //---------------------------------------------------------------------------------------------------------------------
