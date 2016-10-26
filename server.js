@@ -14,7 +14,7 @@ var xml2js = require('xml2js');
 var twilio = require('twilio');
 
 // 'testIt' lets us easily run it as a console bot for local testing
-var testIt = false;
+var testIt = true;
 
 var twilioClient = null;
 var connector = null;
@@ -56,9 +56,12 @@ bot.dialog('/', intents);
 // Helper Functions
 //---------------------------------------------------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------------------------------------------------
+
 function parseEnglishNumber(numberString)
 {
-    //2DO
+    //2DO...
     /*
     var thousands = ['','thousand','million', 'billion','trillion'];
     var ones = ['zero','one','two','three','four', 'five','six','seven','eight','nine'];
@@ -91,7 +94,7 @@ function parseNumberEntity(numberEntity)
 
 function giveBones(session, numBones)
 {
-    console.log("give " + numBones + " bones");
+    console.log("give " + numBones + (numBones == 1 ? " bone" : "bones"));
     session.userData.bonesGiven += numBones;
     if (session.userData.bonesGiven > 5)
     {
@@ -144,7 +147,7 @@ function givePraise(session, amount)
 //---------------------------------------------------------------------------------------------------------------------
 
 intents.onBegin(
-    // Note: onBegin automagically gets hit whenever a dialog is first opened...
+    // Note: onBegin automagically gets hit when the conversation is started...
     function (session, args, next)
     {
         // Let's establish who the user is...'
@@ -417,7 +420,7 @@ intents.matches(/^status/i,
 [
     function (session)
     {
-        session.send("%s, you have %d bones and your bet size is %d.",
+        session.send("%s, you have %d " + (session.userData.bones == 1 ? " bone" : "bones") + " and your bet size is %d.",
             session.userData.firstName,
             session.userData.bones,
             session.userData.betSize);
@@ -488,17 +491,18 @@ intents.matches(/^flip/i,
     function (session)
     {
         var coin = Math.floor(Math.random() * 2);
-        var boneString = (session.userData.betSize == 1) ? "bone" : "bones";
+        console.log(session.userData.betSize);
+        var boneString = String(session.userData.betSize) + ((session.userData.betSize == 1) ? " bone" : " bones");
         if (coin == 0)
         {
             // you lose
-            session.send("Coin comes up TAILS. You lose %s %s. WHOOF!!", session.userData.betSize, boneString);
+            session.send("Coin comes up TAILS. You lose %s. WHOOF!!", boneString);
             session.userData.bones -= session.userData.betSize;
         }
         else
         {
             // you win
-            session.send("Coin comes up HEADS. You win %s %s!", session.userData.betSize, boneString);
+            session.send("Coin comes up HEADS. You win %s!", boneString);
             session.userData.bones += session.userData.betSize;
         }
     }
@@ -526,7 +530,7 @@ intents.matches(/^bet/i,
     function (session, results)
     {
         session.userData.betSize = results.response;
-        session.send("Ok. Bet size is %d bones.", session.userData.betSize);
+        session.send("Ok. Bet size is %d %s.", session.userData.betSize, (session.userData.betSize == 1) ? " bone" : " bones");
     }
 ]);
 
@@ -541,7 +545,14 @@ intents.matches(/^bones/i,
     function (session, results)
     {
         session.userData.bones = results.response;
-        session.send("Yum! Those %d bones look tasty.", session.userData.bones);
+        if (session.userData.numBones == 1)
+        {
+           session.send("Yum! That bone looks tasty.");
+        }
+        else
+        {
+            session.send("Yum! Those %d bones look tasty.", session.userData.bones);
+        }
     }
 ]);
 
@@ -647,6 +658,9 @@ intents.matches(/^askName/i,
 
 bot.dialog('/askNameDialog',
 [
+    // Just playing around with prompts and whether it makes sense to break out "interviewing" the user via
+    // a dialog per profile "field". For example, this dialog handles getting the user's name and
+    // confirming it.
     function (session, args, next)
     {
         /*
@@ -677,9 +691,9 @@ bot.dialog('/askNameDialog',
         }
         else
         {
-            session.send("Ok");
+            session.send("No prob. Forgotten already.");
         }
-        session.endDialog("ok");
+        session.endDialog();
     }
 ]);
 
