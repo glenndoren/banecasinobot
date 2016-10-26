@@ -14,7 +14,7 @@ var xml2js = require('xml2js');
 var twilio = require('twilio');
 
 // 'testIt' lets us easily run it as a console bot for local testing
-var testIt = true;
+var testIt = false;
 
 var twilioClient = null;
 var connector = null;
