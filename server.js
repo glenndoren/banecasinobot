@@ -452,6 +452,7 @@ intents.matches(/^speak/i,
 
 intents.matches(/^quote/i,
 [
+    // Good example of using a web service to grab some info via http request...
     function (session)
     {
         builder.Prompts.text(session, "What stock symbol?");
@@ -560,13 +561,15 @@ intents.matches(/^bones/i,
 
 intents.matches(/^give/i,
 [
-    /*function (session)
+    // For now, just give 1 bone at a time so we can more easily see the progression everytime
+    // Bane gets a bone...
+    /*function (session, args, next)
     {
         builder.Prompts.number(session, "How many bones can I have?!");
     },
     function (session, results)
     */
-    function (session)
+    function (session, args, next)
     {
         session.userData.bonesGiven += 1; //results.response;
         if (session.userData.bonesGiven > 5)
@@ -578,7 +581,7 @@ intents.matches(/^give/i,
             var s = "";
             for (var i = 0; i < session.userData.bonesGiven; i++)
             {
-                s += "WHOOF!!! ";
+                s += "WHOOF!!! More!";
             }
             session.send(s);
         }
