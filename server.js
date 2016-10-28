@@ -18,11 +18,11 @@ var twilio = require('twilio');
 //---------------------------------------------------------------------------------------------------------------------
 
 // 'testIt' lets us easily run it as a console bot for local testing
-var testIt = true;
+var testIt = false;
 
 // Quick way to enable/disable debugging log. Comment out the second line below to turn it off.
 var debugLog = function(){};
-debugLog = console.log;
+//debugLog = console.log;
 
 var twilioClient = null;
 var connector = null;
