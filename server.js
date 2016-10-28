@@ -13,12 +13,25 @@ var request = require('request');
 var xml2js = require('xml2js');
 var twilio = require('twilio');
 
+//---------------------------------------------------------------------------------------------------------------------
+// Global Vars
+//---------------------------------------------------------------------------------------------------------------------
+
 // 'testIt' lets us easily run it as a console bot for local testing
-var testIt = false;
+var testIt = true;
+
+// Quick way to enable/disable debugging log. Comment out the second line below to turn it off.
+var debugLog = function(){};
+debugLog = console.log;
 
 var twilioClient = null;
 var connector = null;
 var bot = null;
+
+//---------------------------------------------------------------------------------------------------------------------
+// Main
+//---------------------------------------------------------------------------------------------------------------------
+
 if (testIt)
 {
     // 2DO: probably best to not have twilio account SID and PASSWORD in here, but works for now. Should
@@ -37,7 +50,7 @@ else
     var server = restify.createServer();
     server.listen(process.env.PORT || 3000, function() 
     {
-        console.log('%s listening to %s', server.firstName, server.url); 
+        debugLog('%s listening to %s', server.firstName, server.url); 
     });
 
     // Create chat bot
@@ -54,9 +67,6 @@ bot.dialog('/', intents);
 
 //---------------------------------------------------------------------------------------------------------------------
 // Helper Functions
-//---------------------------------------------------------------------------------------------------------------------
-
-
 //---------------------------------------------------------------------------------------------------------------------
 
 function parseEnglishNumber(numberString)
@@ -94,7 +104,7 @@ function parseNumberEntity(numberEntity)
 
 function giveBones(session, numBones)
 {
-    console.log("give " + numBones + (numBones == 1 ? " bone" : "bones"));
+    debugLog("give " + numBones + (numBones == 1 ? " bone" : "bones"));
     session.userData.bonesGiven += numBones;
     if (session.userData.bonesGiven > 5)
     {
@@ -171,7 +181,9 @@ intents.onDefault(
     {
         if (!session.userData.firstName)
         {
+            session.userData.justJoined = true;
             session.beginDialog('/profile');
+            debugLog("onDefault:profile");
         }
         else
         {
@@ -180,9 +192,10 @@ intents.onDefault(
     },
     function (session, results)
     {
+        debugLog("onDefault:justJoined=" + session.userData.justJoined);
         if (!session.userData.justJoined || (session.userData.justJoined == false))
         {
-            session.send('Hi %s! Ask for HELP if you need it.', session.userData.firstName);
+            session.send('Ask for HELP if you need it.', session.userData.firstName);
         }
         session.userData.justJoined = false;
     }
@@ -286,7 +299,27 @@ intents.matches('Speak',
 [
     function (session, args, next)
     {
-        session.send("Whoof! Whoof!");
+        // This intent is currently very vague/general, so it comes up a lot. For now, rather than remove it,
+        // let's just react only if it has a reasonably high score. Otherwise, we'll suggest help if we hit this with a
+        // low LUIS score several times in a row...
+        if (args.score > 0.7)
+        {
+            session.send("Whoof! Whoof!");
+        }
+        else
+        {
+            session.userData.numSpeaks++;
+            // 2DO: Why does this only work if the following session.send("Whoof?") is done? Makes no sense, but have discovered through
+            // debugging that this causes the numSpeaks field to persist. Otherwise, it always gets reset to 0. Perhaps the botbuilder code doesn't
+            // persist userData if there aren't any session.sends? Odd, but possible bug... Should investigate. Also need to grab latest botbuilder code
+            // and see if this bug is still there.
+            session.send("Whoof?");
+            if (session.userData.numSpeaks > 2)
+            {
+                session.send("Maybe HELP is needed?");
+                session.userData.numSpeaks = 0;
+            }
+        }
     }
 ]);
 
@@ -465,20 +498,22 @@ intents.matches(/^quote/i,
             // Check for error
             if(error)
             {
-                return console.log('Sorry, I had a problem getting that for you. Error code was ' + error);
+                debugLog('Sorry, I had a problem getting that for you. Error code was ' + error);
+                return;
             }
 
             // Check for right status code
             if (response.statusCode !== 200)
             {
-                return console.log('Sorry, I had a problem getting that for you. Status code was ' + response.statusCode);
+                debugLog('Sorry, I had a problem getting that for you. Status code was ' + response.statusCode);
+                return;
             }
 
             // Good result, so parse it and spit out the info we want...
             xml2js.parseString(body, function (err, result)
             {
-                console.dir(JSON.stringify(result));
-                console.log("Company is " + result.StockQuote.Name);
+                //console.dir(JSON.stringify(result));
+                debugLog("Company is " + result.StockQuote.Name);
                 session.send("%s is %s", result.StockQuote.Symbol, result.StockQuote.LastPrice)
             });
         });
@@ -492,7 +527,7 @@ intents.matches(/^flip/i,
     function (session)
     {
         var coin = Math.floor(Math.random() * 2);
-        console.log(session.userData.betSize);
+        debugLog(session.userData.betSize);
         var boneString = String(session.userData.betSize) + ((session.userData.betSize == 1) ? " bone" : " bones");
         if (coin == 0)
         {
@@ -702,14 +737,22 @@ bot.dialog('/askNameDialog',
 
 //---------------------------------------------------------------------------------------------------------------------
 
+function resetUserData(session)
+{
+    session.userData.bonesGiven = 0;
+    session.userData.praise = 0;
+    session.userData.numSpeaks = 0;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
 bot.dialog('/profile',
 [
     function (session, args, next)
     {
         if (!session.userData.firstName)
         {
-            session.userData.bonesGiven = 0;
-            session.userData.praise = 0;
+            resetUserData(session);
             builder.Prompts.text(session, "I'm Bane! What's your first name?");
         }
         else
@@ -746,7 +789,6 @@ bot.dialog('/profile',
         // We'll save the users name and send them an initial greeting. All
         // future messages from the user will be routed to the root dialog.
         session.userData.betSize = results.response;
-        session.userData.justJoined = true;
         //session.send("%s, play with your $%d wisely.", session.userData.firstName, session.userData.money);
         session.endDialog("%s, welcome to my turf :) I can't wait to get those %d bones!", session.userData.firstName, session.userData.bones);
     }
