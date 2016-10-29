@@ -6,6 +6,15 @@
 //
 //---------------------------------------------------------------------------------------------------------------------
 
+/*
+2DO list
+--------
+1) Need to put all UI strings into prompts.js for localization.
+2) Look at breaking out components into separate files, now that this framework is functioning.
+3) Need a better model for Bane's happiness/user relationship/etc that is still memory-efficient.
+4) Look at Azure Storage services--need for more persistent-state stuff and/or other files? Not critical right now, but...
+*/
+
 var restify = require('restify'); 
 var builder = require('botbuilder');
 var prompts = require('./prompts');
@@ -18,7 +27,7 @@ var twilio = require('twilio');
 //---------------------------------------------------------------------------------------------------------------------
 
 // 'testIt' lets us easily run it as a console bot for local testing
-var testIt = false;
+var testIt = true;
 
 // Quick way to enable/disable debugging log. Comment out the second line below to turn it off.
 var debugLog = function(){};
@@ -31,8 +40,6 @@ var bot = null;
 //---------------------------------------------------------------------------------------------------------------------
 // Main
 //---------------------------------------------------------------------------------------------------------------------
-
-//2DO: Need to put all UI strings into prompts.js for localization
 
 if (testIt)
 {
@@ -524,7 +531,14 @@ intents.matches(/^quote/i,
             {
                 //console.dir(JSON.stringify(result));
                 debugLog("Company is " + result.StockQuote.Name);
-                session.send("%s is %s", result.StockQuote.Symbol, result.StockQuote.LastPrice)
+                if (result.StockQuote.LastPrice == "0")
+                {
+                    session.send("Hmmm... isn't that %s? My broker isn't answering :(", result.StockQuote.Name);
+                }
+                else
+                {
+                    session.send("%s is %s", result.StockQuote.Symbol, result.StockQuote.LastPrice);
+                }
             });
         });
     }
@@ -536,6 +550,12 @@ intents.matches(/^flip/i,
 [
     function (session)
     {
+        if (session.userData.bones < session.userData.betSize)
+        {
+            //2DO: good spot to have negative experience affect Bane's happiness... once we have a Happiness rating for him :)
+            session.send("I dont see enough bones! Mean human :(");
+            return;
+        }
         var coin = Math.floor(Math.random() * 2);
         debugLog(session.userData.betSize);
         var boneString = String(session.userData.betSize) + ((session.userData.betSize == 1) ? " bone" : " bones");
@@ -689,9 +709,9 @@ intents.matches(/^askName/i,
 
 bot.dialog('/askNameDialog',
 [
-    // Just playing around with prompts and whether it makes sense to break out "interviewing" the user via
+    // 2DO: Just playing around with prompts and whether it makes sense to break out "interviewing" the user via
     // a dialog per profile "field". For example, this dialog handles getting the user's name and
-    // confirming it.
+    // confirming it. Not currently used...
     function (session, args, next)
     {
         /*
