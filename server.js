@@ -18,7 +18,7 @@ var twilio = require('twilio');
 //---------------------------------------------------------------------------------------------------------------------
 
 // 'testIt' lets us easily run it as a console bot for local testing
-var testIt = false;
+var testIt = true;
 
 // Quick way to enable/disable debugging log. Comment out the second line below to turn it off.
 var debugLog = function(){};
@@ -71,6 +71,13 @@ bot.dialog('/', intents);
 // Helper Functions
 //---------------------------------------------------------------------------------------------------------------------
 
+function getRandomInteger(min, max)
+{
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
 function parseEnglishNumber(numberString)
 {
     //2DO...
@@ -104,26 +111,27 @@ function parseNumberEntity(numberEntity)
 // Bane Actions
 //---------------------------------------------------------------------------------------------------------------------
 
+var giveMoreBones = ["That's it?", "The animal shelter was more generous", "Dig deeper", "More please"];
+var happyWithBones = ["Yum!", "You're my favorite person!", "Happy dog :)", "Best human!"];
+
 function giveBones(session, numBones)
 {
     debugLog("give " + numBones + (numBones == 1 ? " bone" : "bones"));
+    if (numBones > session.userData.bones)
+    {
+        //2DO: good spot to have negative experience affect Bane's happiness... once we have a Happiness rating for him :)
+        session.send("I dont see enough bones! Mean human :(");
+        return;
+    }
     session.userData.bonesGiven += numBones;
+    session.userData.bones -= numBones;
     if (session.userData.bonesGiven > 5)
     {
-        session.send("You're my favorite person!");
-    }
-    else if (session.userData.bonesGiven > 1)
-    {
-        var s = "";
-        for (var i = 0; i < session.userData.bonesGiven; i++)
-        {
-            s += "WHOOF!!! ";
-        }
-        session.send(s);
+        session.send(happyWithBones[getRandomInteger(0, happyWithBones.length - 1)]);
     }
     else
     {
-        session.send("That's it?");
+        session.send(giveMoreBones[getRandomInteger(0, giveMoreBones.length - 1)]);
     }
 }
 
@@ -608,24 +616,7 @@ intents.matches(/^give/i,
     */
     function (session, args, next)
     {
-        session.userData.bonesGiven += 1; //results.response;
-        if (session.userData.bonesGiven > 5)
-        {
-            session.send("You're my favorite person!");
-        }
-        else if (session.userData.bonesGiven > 1)
-        {
-            var s = "";
-            for (var i = 0; i < session.userData.bonesGiven; i++)
-            {
-                s += "WHOOF!!! More!";
-            }
-            session.send(s);
-        }
-        else
-        {
-            session.send("That's it?");
-        }
+        giveBones(session, 1);
     }
 ]);
 
