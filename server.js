@@ -32,6 +32,8 @@ var bot = null;
 // Main
 //---------------------------------------------------------------------------------------------------------------------
 
+//2DO: Need to put all UI strings into prompts.js for localization
+
 if (testIt)
 {
     // 2DO: probably best to not have twilio account SID and PASSWORD in here, but works for now. Should
@@ -532,13 +534,13 @@ intents.matches(/^flip/i,
         if (coin == 0)
         {
             // you lose
-            session.send("Coin comes up TAILS. You lose %s. WHOOF!!", boneString);
+            session.send(prompts.flipLose, boneString);
             session.userData.bones -= session.userData.betSize;
         }
         else
         {
             // you win
-            session.send("Coin comes up HEADS. You win %s!", boneString);
+            session.send(prompts.flipWin, boneString);
             session.userData.bones += session.userData.betSize;
         }
     }

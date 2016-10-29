@@ -1,7 +1,7 @@
 module.exports = {
-    helpMessage: "I'm Bane, the K9 Prince of Belltown! I like to play and have fun.\n" +
-    "For a K9, I speak pretty good english, but I have trouble understanding sometimes :(\n" +
-    "I understand some sentences, but the commands I know for sure in big letters:\n\n" +
+    helpMessage: "I'm Bane, the K9 Prince of Belltown! I like to play and have fun :)\n" +
+    "For a K9, I speak pretty good english, but sometimes I have trouble understanding :(\n" +
+    "I know some sentences, but the commands I know for sure are in big letters:\n\n" +
     "* 'STATUS'\n" +
     "* 'SPEAK Bane!'\n" +
     "* 'get a stock QUOTE'\n" +
@@ -11,7 +11,7 @@ module.exports = {
     "* 'GIVE a bone'\n" +
     "* 'GOOD boy!'\n" +
     "* 'INVITE' another person'\n",
-    flipResult: "Coin flip is %(coindSideUp)s. You %(result)s $%(amount)d.",
-    status: "money: $%(money)d"
+    flipLose: "Coin comes up TAILS. You lose %s. WHOOF!!",
+    flipWin: "Coin comes up HEADS. You win %s!"
 };
 
