@@ -37,6 +37,7 @@ var displayDebug = true;
 // Global Vars
 //---------------------------------------------------------------------------------------------------------------------
 
+var buildVersion = "2019.10.31.05";
 var debugLog = function(){};
 var debugScreen = function(){};
 var twilioClient = null;
@@ -50,7 +51,7 @@ var bot = null;
 if (displayDebug)
 {
     debugLog = console.log;
-    debugScreen = session.send;
+    debugScreen = function(session, s) {session.send(s);}
 }
 
 if (testIt)
@@ -221,7 +222,7 @@ intents.onDefault(
     },
     function (session, results)
     {
-        debugScreen("onDefault:justJoined=" + session.userData.justJoined);
+        debugScreen(session, "onDefault:justJoined=" + session.userData.justJoined);
         if (!session.userData.justJoined || (session.userData.justJoined == false))
         {
             session.send('Ask for HELP if you need it.', session.userData.firstName);
@@ -338,7 +339,7 @@ intents.matches('Speak',
         
         // This intent is currently very vague/general, so it comes up a lot. For now, rather than remove it,
         // let's just react only if it has a reasonably high score. Otherwise, we'll suggest help if we hit this with a
-        debugScreen("Score=" + args.score);
+        debugScreen(session, "Score=" + args.score);
         // low LUIS score several times in a row...
         if (args.score > 0.7)
         {
@@ -346,7 +347,7 @@ intents.matches('Speak',
         }
         else
         {
-            debugScreen("Score=" + args.score);
+            debugScreen(session, "Score=" + args.score);
             session.userData.numSpeaks++;
             // 2DO: Why does this only work if the following session.send("Whoof?") is done? Makes no sense, but have discovered through
             // debugging that this causes the numSpeaks field to persist. Otherwise, it always gets reset to 0. Perhaps the botbuilder code doesn't
@@ -522,10 +523,21 @@ intents.matches(/^status/i,
             return;
         }
 
-        session.send("%s, you have %d " + (session.userData.bones == 1 ? " bone" : "bones") + " and your bet size is %d.",
-            session.userData.firstName,
-            session.userData.bones,
-            session.userData.betSize);
+        if (displayDebug)
+        {
+            session.send("%s, you have %d " + (session.userData.bones == 1 ? " bone" : "bones") + " and your bet size is %d.\nVersion %s",
+                session.userData.firstName,
+                session.userData.bones,
+                session.userData.betSize,
+                buildVersion);
+        }
+        else
+        {
+            session.send("%s, you have %d " + (session.userData.bones == 1 ? " bone" : "bones") + " and your bet size is %d.",
+                session.userData.firstName,
+                session.userData.bones,
+                session.userData.betSize);
+        }
     }
 ]);
 
