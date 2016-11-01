@@ -31,13 +31,13 @@ var twilio = require('twilio');
 var testIt = false;
 
 // 'displayDebug' enables logging to console
-var displayDebug = true;
+var displayDebug = false;
 
 //---------------------------------------------------------------------------------------------------------------------
 // Global Vars
 //---------------------------------------------------------------------------------------------------------------------
 
-var buildVersion = "2019.10.31.05";
+var buildVersion = "2019.10.31.00";
 var debugLog = function(){};
 var debugScreen = function(){};
 var twilioClient = null;
@@ -524,7 +524,7 @@ intents.matches(/^debuginfo/i,
             return;
         }
 
-        session.send("firstname: %s, bones: %d, betSize: %d, justJoined: %s, praise: %d, numSPeaks: %d, version: %s",
+        session.send("firstname: %s, bones: %d, betSize: %d, justJoined: %s, praise: %d, numSpeaks: %d, version: %s",
             session.userData.firstName,
             session.userData.bones,
             session.userData.betSize,
