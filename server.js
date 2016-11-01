@@ -13,6 +13,8 @@
 2) Look at breaking out components into separate files, now that this framework is functioning.
 3) Need a better model for Bane's happiness/user relationship/etc that is still memory-efficient.
 4) Look at Azure Storage services--need for more persistent-state stuff and/or other files? Not critical right now, but...
+5) Record time of last user response, so Bane can acknowledge that in reply. Eg: "Good morning", "been awhile", etc.
+6) Customize responses based on time of day, time since last exchange, etc. (see #5 above)
 */
 
 var restify = require('restify'); 
