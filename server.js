@@ -514,6 +514,29 @@ intents.matches('GiveItem',
 // Basic non-LUIS Intents
 //---------------------------------------------------------------------------------------------------------------------
 
+intents.matches(/^debuginfo/i,
+[
+    function (session)
+    {
+        if (!session.userData.firstName)
+        {
+            debugLog("Status:no profile");
+            return;
+        }
+
+        session.send("firstname: %s, bones: %d, betSize: %d, justJoined: %s, praise: %d, numSPeaks: %d, version: %s",
+            session.userData.firstName,
+            session.userData.bones,
+            session.userData.betSize,
+            session.userData.justJoined,
+            session.userData.praise,
+            session.userData.numSpeaks,
+            buildVersion);
+    }
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
 intents.matches(/^status/i,
 [
     function (session)
@@ -524,21 +547,10 @@ intents.matches(/^status/i,
             return;
         }
 
-        if (displayDebug)
-        {
-            session.send("%s, you have %d " + (session.userData.bones == 1 ? " bone" : "bones") + " and your bet size is %d.\nVersion %s",
-                session.userData.firstName,
-                session.userData.bones,
-                session.userData.betSize,
-                buildVersion);
-        }
-        else
-        {
-            session.send("%s, you have %d " + (session.userData.bones == 1 ? " bone" : "bones") + " and your bet size is %d.",
-                session.userData.firstName,
-                session.userData.bones,
-                session.userData.betSize);
-        }
+        session.send("%s, you have %d " + (session.userData.bones == 1 ? " bone" : "bones") + " and your bet size is %d.",
+            session.userData.firstName,
+            session.userData.bones,
+            session.userData.betSize);
     }
 ]);
 
