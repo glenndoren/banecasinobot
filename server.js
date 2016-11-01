@@ -524,7 +524,7 @@ intents.matches(/^debuginfo/i,
             return;
         }
 
-        session.send("firstname: %s, bones: %d, betSize: %d, justJoined: %s, praise: %d, numSpeaks: %d, version: %s",
+        session.send("firstname=%s, bones=%d, betSize=%d, justJoined=%s, praise=%d, numSpeaks=%d, version=%s",
             session.userData.firstName,
             session.userData.bones,
             session.userData.betSize,
