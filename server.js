@@ -733,6 +733,24 @@ intents.matches(/^bones/i,
 
 //---------------------------------------------------------------------------------------------------------------------
 
+intents.matches(/^bat/i,
+[
+    // For now, just give 1 bone at a time so we can more easily see the progression everytime
+    // Bane gets a bone...
+    /*function (session, args, next)
+    {
+        builder.Prompts.number(session, "How many bones can I have?!");
+    },
+    function (session, results)
+    */
+    function (session, args, next)
+    {
+        session.send("01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 01234567890 ");
+    }
+]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
 intents.matches(/^give/i,
 [
     // For now, just give 1 bone at a time so we can more easily see the progression everytime
