@@ -1,6 +1,6 @@
 module.exports = {
-    helpMessage: "I'm Bane, the K9 Prince of Belltown!" +
-    "For a K9, I speak pretty good english, but sometimes I have trouble understanding :(\n" +
+    helpMessage: "I'm Bane, the K9 Prince of Belltown! " +
+    "For a K9, I speak pretty good english, but sometimes I have trouble understanding :( " +
     "I know some sentences, but the commands I know for sure are in big letters:\n" +
     "* STATUS\n" +
     "* SPEAK Bane!\n" +
