@@ -319,10 +319,19 @@ intents.matches('GoodBye',
 
 intents.matches('Help',
 [
-    function (session)
+    function (session, args, next)
     {
-        session.send(prompts.helpMessage);
+        builder.Prompts.text(session, prompts.helpMessage1 + "[MORE]");
+    },
+    function (session, results)
+    {
+        builder.Prompts.text(session, prompts.helpMessage2 + "[MORE]");
+    },
+    function (session, results)
+    {
+        session.send(prompts.helpMessage3);
     }
+
 ]);
 
 //---------------------------------------------------------------------------------------------------------------------
