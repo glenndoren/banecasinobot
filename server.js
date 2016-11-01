@@ -13,6 +13,7 @@
 2) Look at breaking out components into separate files, now that this framework is functioning.
 3) Need a better model for Bane's happiness/user relationship/etc that is still memory-efficient.
 4) Look at Azure Storage services--need for more persistent-state stuff and/or other files? Not critical right now, but...
+5) Remove redundant calls to /profile since onBegin seems reliable.
 */
 
 var restify = require('restify'); 
@@ -23,16 +24,20 @@ var xml2js = require('xml2js');
 var twilio = require('twilio');
 
 //---------------------------------------------------------------------------------------------------------------------
-// Global Vars
+// Global Flags
 //---------------------------------------------------------------------------------------------------------------------
 
 // 'testIt' lets us easily run it as a console bot for local testing
 var testIt = false;
 
-// Quick way to enable/disable debugging log. Comment out the second line below to turn it off.
-var debugLog = function(){};
-//debugLog = console.log;
+// 'displayDebug' enables logging to console
+var displayDebug = false;
 
+//---------------------------------------------------------------------------------------------------------------------
+// Global Vars
+//---------------------------------------------------------------------------------------------------------------------
+
+var debugLog = function(){};
 var twilioClient = null;
 var connector = null;
 var bot = null;
@@ -40,6 +45,11 @@ var bot = null;
 //---------------------------------------------------------------------------------------------------------------------
 // Main
 //---------------------------------------------------------------------------------------------------------------------
+
+if (displayDebug)
+{
+    debugLog = console.log;
+}
 
 if (testIt)
 {
@@ -224,6 +234,11 @@ intents.matches('SetValue',
 [
     function (session, args, next)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("SetValue:no profile");
+            return;
+        }
         var numberEntity = builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
         var number = parseNumberEntity(numberEntity);
         if (isNaN(number))
@@ -258,6 +273,12 @@ intents.matches('Praise',
 [
     function (session, args, next)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("Praise:no profile");
+            return;
+        }
+
         givePraise(session, 1);
     }
 ]);
@@ -270,14 +291,11 @@ intents.matches('Hello',
     {
         if (!session.userData.firstName)
         {
-            // We don't have a profile yet for this user, confirm first name
-            session.send("Hi!");
-            session.beginDialog('/profile');
+            debugLog("Hello:no profile");
+            return;
         }
-        else
-        {
-            session.send("Hi " + session.userData.firstName);
-        }
+
+        session.send("Hi " + session.userData.firstName);
     }
 ]);
 
@@ -287,13 +305,7 @@ intents.matches('GoodBye',
 [
     function (session, args, next)
     {
-        if (!session.userData.firstName)
-        {
-            // We don't have a profile yet for this user, confirm first name
-            session.send("I don't even know you!");
-            session.beginDialog('/profile');
-        }
-        else
+        if (session.userData.firstName)
         {
             session.send("Bye " + session.userData.firstName);
         }
@@ -316,6 +328,12 @@ intents.matches('Speak',
 [
     function (session, args, next)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("Speak:no profile");
+            return;
+        }
+        
         // This intent is currently very vague/general, so it comes up a lot. For now, rather than remove it,
         // let's just react only if it has a reasonably high score. Otherwise, we'll suggest help if we hit this with a
         // low LUIS score several times in a row...
@@ -346,6 +364,12 @@ intents.matches('IncreaseValue',
 [
     function (session, args, next)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("IncreaseValue:no profile");
+            return;
+        }
+
         var numberEntity = builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
         var number = parseNumberEntity(numberEntity);
         if (isNaN(number))
@@ -380,6 +404,12 @@ intents.matches('DecreaseValue',
 [
     function (session, args, next)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("DecreaseValue:no profile");
+            return;
+        }
+
         var numberEntity = builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
         var number = parseNumberEntity(numberEntity);
         if (isNaN(number))
@@ -414,6 +444,12 @@ intents.matches('IdentifySelf',
 [
     function (session, args, next)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("IdentifySelf:no profile");
+            return;
+        }
+
         var firstName = builder.EntityRecognizer.findEntity(args.entities, 'Name::FirstName');
         if (!session.userData.firstName)
         {
@@ -437,6 +473,12 @@ intents.matches('GiveItem',
 [
     function (session, args, next)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("GiveItem:no profile");
+            return;
+        }
+
         var numberEntity = builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
         var number = parseNumberEntity(numberEntity);
         if (isNaN(number))
@@ -470,6 +512,12 @@ intents.matches(/^status/i,
 [
     function (session)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("Status:no profile");
+            return;
+        }
+
         session.send("%s, you have %d " + (session.userData.bones == 1 ? " bone" : "bones") + " and your bet size is %d.",
             session.userData.firstName,
             session.userData.bones,
@@ -483,6 +531,11 @@ intents.matches(/^speak/i,
 [
     function (session)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("Speak:no profile");
+            return;
+        }
         // Create and send the pic
         // 2DO: would be best to use some storage service (e.g. Azure Blob Storage) but this works for quick test...
         var attachment =
@@ -550,6 +603,12 @@ intents.matches(/^flip/i,
 [
     function (session)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("Flip:no profile");
+            return;
+        }
+
         if (session.userData.bones < session.userData.betSize)
         {
             //2DO: good spot to have negative experience affect Bane's happiness... once we have a Happiness rating for him :)
@@ -582,6 +641,7 @@ intents.matches(/^reset/i,
     {
         delete session.userData.firstName;
         session.send("UserData reset.");
+        session.beginDialog('/profile');
     }
 ]);
 
@@ -595,6 +655,12 @@ intents.matches(/^bet/i,
     },
     function (session, results)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("Bet:no profile");
+            return;
+        }
+
         session.userData.betSize = results.response;
         session.send("Ok. Bet size is %d %s.", session.userData.betSize, (session.userData.betSize == 1) ? " bone" : " bones");
     }
@@ -610,6 +676,12 @@ intents.matches(/^bones/i,
     },
     function (session, results)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("Bones:no profile");
+            return;
+        }
+
         session.userData.bones = results.response;
         if (session.userData.numBones == 1)
         {
@@ -636,6 +708,12 @@ intents.matches(/^give/i,
     */
     function (session, args, next)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("Give:no profile");
+            return;
+        }
+
         giveBones(session, 1);
     }
 ]);
@@ -652,6 +730,12 @@ intents.matches(/^good/i,
     */
     function (session)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("Good:no profile");
+            return;
+        }
+
         session.userData.praise += 1; //results.response;
         if (session.userData.praise > 2)
         {
@@ -686,6 +770,12 @@ intents.matches(/^invite/i,
     },
     function (session, results)
     {
+        if (!session.userData.firstName)
+        {
+            debugLog("Invite:no profile");
+            return;
+        }
+
         twilioClient.sendMessage({
             to: results.response,
             from: '19419328711',
@@ -750,7 +840,7 @@ bot.dialog('/askNameDialog',
 
 //---------------------------------------------------------------------------------------------------------------------
 
-function resetUserData(session)
+function initUserData(session)
 {
     session.userData.bonesGiven = 0;
     session.userData.praise = 0;
@@ -763,15 +853,8 @@ bot.dialog('/profile',
 [
     function (session, args, next)
     {
-        if (!session.userData.firstName)
-        {
-            resetUserData(session);
-            builder.Prompts.text(session, "I'm Bane! What's your first name?");
-        }
-        else
-        {
-            next();
-        }
+        initUserData(session);
+        builder.Prompts.text(session, "I'm Bane! What's your first name?");
     },
     function (session, results)
     {
@@ -786,7 +869,7 @@ bot.dialog('/profile',
         // We'll save the users name and ask him for his starting money. All
         // future messages from the user will be routed to the root dialog.
         session.userData.mobile = results.response;
-        var prompt = "How many bones do you have to play with? (eg: 10)";
+        var prompt = "I love bones! How many bones do you have to play with? (eg: 10)";
         builder.Prompts.number(session, prompt);
     },
     function (session, results)
@@ -803,7 +886,8 @@ bot.dialog('/profile',
         // future messages from the user will be routed to the root dialog.
         session.userData.betSize = results.response;
         //session.send("%s, play with your $%d wisely.", session.userData.firstName, session.userData.money);
-        session.endDialog("%s, welcome to my turf :) I can't wait to get those %d bones!", session.userData.firstName, session.userData.bones);
+        session.endDialog("%s, welcome to my turf :) I can't wait to get those %d bones! Ask for HELP if you need it :)", session.userData.firstName, session.userData.bones);
+        debugLog("User created.");
     }
 ]);
 
