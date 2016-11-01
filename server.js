@@ -31,7 +31,7 @@ var twilio = require('twilio');
 var testIt = false;
 
 // 'displayDebug' enables logging to console
-var displayDebug = true;
+var displayDebug = false;
 
 //---------------------------------------------------------------------------------------------------------------------
 // Global Vars
