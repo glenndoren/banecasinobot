@@ -317,7 +317,7 @@ intents.matches('GoodBye',
 
 //---------------------------------------------------------------------------------------------------------------------
 
-intents.matches('huh',
+intents.matches('Help',
 [
     function (session, args, next)
     {
