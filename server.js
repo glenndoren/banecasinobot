@@ -225,7 +225,7 @@ intents.onDefault(
         debugScreen(session, "onDefault:justJoined=" + session.userData.justJoined);
         if (!session.userData.justJoined || (session.userData.justJoined == false))
         {
-            session.send('Ask for HELP if you need it.', session.userData.firstName);
+            session.send("TYPE '?' for HELP if you need it.", session.userData.firstName);
         }
         session.userData.justJoined = false;
     }
@@ -321,17 +321,8 @@ intents.matches('Help',
 [
     function (session, args, next)
     {
-        builder.Prompts.text(session, prompts.helpMessage1 + "[MORE]");
-    },
-    function (session, results)
-    {
-        builder.Prompts.text(session, prompts.helpMessage2 + "[MORE]");
-    },
-    function (session, results)
-    {
-        session.send(prompts.helpMessage3);
+        session.send(prompts.helpMessage);
     }
-
 ]);
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -365,7 +356,7 @@ intents.matches('Speak',
             session.send("Whoof?");
             if (session.userData.numSpeaks > 2)
             {
-                session.send("Maybe HELP is needed?");
+                session.send("Maybe help is needed? Type '?' for help!");
                 session.userData.numSpeaks = 0;
             }
         }
@@ -476,7 +467,7 @@ intents.matches('IdentifySelf',
         }
         else
         {
-            session.send('Hi! Ask for HELP if you need it.');
+            session.send("Hi! Type '?' for help.");
         }
     }
 ]);
@@ -943,7 +934,7 @@ bot.dialog('/profile',
         // future messages from the user will be routed to the root dialog.
         session.userData.betSize = results.response;
         //session.send("%s, play with your $%d wisely.", session.userData.firstName, session.userData.money);
-        session.endDialog("%s, welcome to my turf :) I can't wait to get those %d bones! Ask for HELP if you need it :)", session.userData.firstName, session.userData.bones);
+        session.endDialog("%s, welcome to my turf :) I can't wait to get those %d bones! Type '?' for help! :)", session.userData.firstName, session.userData.bones);
         debugLog("User created.");
     }
 ]);
