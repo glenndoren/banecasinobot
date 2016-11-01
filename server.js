@@ -211,6 +211,7 @@ intents.onDefault(
     {
         if (!session.userData.firstName)
         {
+            debugScreen(session, "onDefault:justJoined set to true");
             session.userData.justJoined = true;
             session.beginDialog('/profile');
             debugLog("onDefault:profile");
