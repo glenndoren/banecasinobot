@@ -28,7 +28,7 @@ var twilio = require('twilio');
 //---------------------------------------------------------------------------------------------------------------------
 
 // 'testIt' lets us easily run it as a console bot for local testing
-var testIt = false;
+var testIt = true;
 
 // 'displayDebug' enables logging to console
 var displayDebug = false;
@@ -38,6 +38,7 @@ var displayDebug = false;
 //---------------------------------------------------------------------------------------------------------------------
 
 var debugLog = function(){};
+var debugScreen = function(){};
 var twilioClient = null;
 var connector = null;
 var bot = null;
@@ -49,6 +50,7 @@ var bot = null;
 if (displayDebug)
 {
     debugLog = console.log;
+    debugScreen = session.send;
 }
 
 if (testIt)
@@ -219,7 +221,7 @@ intents.onDefault(
     },
     function (session, results)
     {
-        debugLog("onDefault:justJoined=" + session.userData.justJoined);
+        debugScreen("onDefault:justJoined=" + session.userData.justJoined);
         if (!session.userData.justJoined || (session.userData.justJoined == false))
         {
             session.send('Ask for HELP if you need it.', session.userData.firstName);
