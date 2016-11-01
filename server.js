@@ -859,6 +859,8 @@ bot.dialog('/askNameDialog',
 
 function initUserData(session)
 {
+    session.userData.firstName = null;
+    session.userData.justJoined = false;
     session.userData.bonesGiven = 0;
     session.userData.praise = 0;
     session.userData.numSpeaks = 0;
