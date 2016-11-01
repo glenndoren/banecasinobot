@@ -28,7 +28,7 @@ var twilio = require('twilio');
 //---------------------------------------------------------------------------------------------------------------------
 
 // 'testIt' lets us easily run it as a console bot for local testing
-var testIt = true;
+var testIt = false;
 
 // 'displayDebug' enables logging to console
 var displayDebug = true;
